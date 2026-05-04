@@ -21,6 +21,21 @@ export const Quiz = ({ topic, onBack }: { topic: string; onBack: () => void }) =
     setTimeLeft(TIME_PER_Q);
   };
 
+  const speak = (text: string) => {
+    try {
+      if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.rate = 1.05;
+      u.pitch = 1.1;
+      u.volume = 1;
+      u.lang = "en-US";
+      window.speechSynthesis.speak(u);
+    } catch {
+      // ignore
+    }
+  };
+
   // timer
   useEffect(() => {
     if (feedback) return;
@@ -28,7 +43,8 @@ export const Quiz = ({ topic, onBack }: { topic: string; onBack: () => void }) =
       setFeedback("wrong");
       setStreak(0);
       setScore((s) => ({ correct: s.correct, total: s.total + 1 }));
-      const t = setTimeout(next, 900);
+      speak("Good try");
+      const t = setTimeout(next, 250);
       return () => clearTimeout(t);
     }
     const id = setTimeout(() => setTimeLeft((t) => t - 1), 1000);
@@ -42,7 +58,8 @@ export const Quiz = ({ topic, onBack }: { topic: string; onBack: () => void }) =
     setFeedback(correct ? "correct" : "wrong");
     setScore((s) => ({ correct: s.correct + (correct ? 1 : 0), total: s.total + 1 }));
     setStreak((st) => (correct ? st + 1 : 0));
-    setTimeout(next, 700);
+    speak(correct ? "Good" : "Good try");
+    setTimeout(next, 250);
   };
 
   const pct = (timeLeft / TIME_PER_Q) * 100;
