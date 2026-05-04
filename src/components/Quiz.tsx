@@ -26,10 +26,19 @@ export const Quiz = ({ topic, onBack }: { topic: string; onBack: () => void }) =
       if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
       window.speechSynthesis.cancel();
       const u = new SpeechSynthesisUtterance(text);
-      u.rate = 1.05;
-      u.pitch = 1.1;
-      u.volume = 1;
-      u.lang = "en-US";
+
+      // Pick a soft female English voice if available
+      const voices = window.speechSynthesis.getVoices();
+      const preferred =
+        voices.find((v) => /female/i.test(v.name) && /en/i.test(v.lang)) ||
+        voices.find((v) => /(samantha|victoria|karen|tessa|zira|susan|fiona|moira|serena|google uk english female|google us english)/i.test(v.name)) ||
+        voices.find((v) => /en-US|en-GB/i.test(v.lang));
+      if (preferred) u.voice = preferred;
+
+      u.lang = preferred?.lang || "en-US";
+      u.rate = 0.95;
+      u.pitch = 1.25;
+      u.volume = 0.55; // soft
       window.speechSynthesis.speak(u);
     } catch {
       // ignore
