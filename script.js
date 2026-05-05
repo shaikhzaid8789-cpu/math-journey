@@ -749,7 +749,8 @@ function bindGlobalEvents() {
 }
 
 function render() {
-  clearTimers();
+  if (state.timerId) clearTimeout(state.timerId);
+  state.timerId = null;
   if (location.pathname === "/privacy") {
     renderPrivacy();
     return;
