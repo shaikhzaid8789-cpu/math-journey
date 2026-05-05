@@ -21,27 +21,17 @@ export const Quiz = ({ topic, onBack }: { topic: string; onBack: () => void }) =
     setTimeLeft(TIME_PER_Q);
   };
 
-  const speak = (text: string) => {
-    try {
-      if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
-      window.speechSynthesis.cancel();
-      const u = new SpeechSynthesisUtterance(text);
-
-      // Pick a soft female English voice if available
-      const voices = window.speechSynthesis.getVoices();
-      const preferred =
-        voices.find((v) => /female/i.test(v.name) && /en/i.test(v.lang)) ||
-        voices.find((v) => /(samantha|victoria|karen|tessa|zira|susan|fiona|moira|serena|google uk english female|google us english)/i.test(v.name)) ||
-        voices.find((v) => /en-US|en-GB/i.test(v.lang));
-      if (preferred) u.voice = preferred;
-
-      u.lang = preferred?.lang || "en-US";
-      u.rate = 0.95;
-      u.pitch = 1.25;
-      u.volume = 0.55; // soft
-      window.speechSynthesis.speak(u);
-    } catch {
-      // ignore
+  const triggerInterstitialAd = (answeredCount: number) => {
+    if (answeredCount > 0 && answeredCount % 20 === 0) {
+      try {
+        // ============================================================
+        // Paste your Propeller Ads Interstitial Ad code here
+        // Example:
+        // (function(){ /* Propeller Ads interstitial snippet */ })();
+        // ============================================================
+      } catch {
+        // ignore ad errors
+      }
     }
   };
 
@@ -51,9 +41,12 @@ export const Quiz = ({ topic, onBack }: { topic: string; onBack: () => void }) =
     if (timeLeft <= 0) {
       setFeedback("wrong");
       setStreak(0);
-      setScore((s) => ({ correct: s.correct, total: s.total + 1 }));
-      speak("Good try");
-      const t = setTimeout(next, 250);
+      setScore((s) => {
+        const total = s.total + 1;
+        triggerInterstitialAd(total);
+        return { correct: s.correct, total };
+      });
+      const t = setTimeout(next, 2000);
       return () => clearTimeout(t);
     }
     const id = setTimeout(() => setTimeLeft((t) => t - 1), 1000);
@@ -65,10 +58,13 @@ export const Quiz = ({ topic, onBack }: { topic: string; onBack: () => void }) =
     const correct = opt === question.answer;
     setSelected(opt);
     setFeedback(correct ? "correct" : "wrong");
-    setScore((s) => ({ correct: s.correct + (correct ? 1 : 0), total: s.total + 1 }));
+    setScore((s) => {
+      const total = s.total + 1;
+      triggerInterstitialAd(total);
+      return { correct: s.correct + (correct ? 1 : 0), total };
+    });
     setStreak((st) => (correct ? st + 1 : 0));
-    speak(correct ? "Good" : "Good try");
-    setTimeout(next, 250);
+    setTimeout(next, 2000);
   };
 
   const pct = (timeLeft / TIME_PER_Q) * 100;
