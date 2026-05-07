@@ -549,17 +549,35 @@ function timeExpired() {
   state.nextId = setTimeout(() => nextQuestion(true), 2000);
 }
 
+function updateTimerUI() {
+  const pct = (state.timeLeft / TIME_PER_Q) * 100;
+  const danger = state.timeLeft <= 10;
+  const valueEl = document.querySelector(".time-value");
+  const barEl = document.querySelector(".progress-bar");
+  if (valueEl) {
+    valueEl.textContent = `${String(state.timeLeft).padStart(2, "0")}s`;
+    valueEl.classList.toggle("danger", danger);
+  }
+  if (barEl) {
+    barEl.style.width = `${pct}%`;
+    barEl.classList.toggle("danger", danger);
+  }
+}
+
 function startTimer() {
   if (state.screen !== "quiz" || state.feedback) return;
   if (state.timerId) clearTimeout(state.timerId);
-  state.timerId = setTimeout(() => {
+  const tick = () => {
+    if (state.screen !== "quiz" || state.feedback) return;
     state.timeLeft -= 1;
     if (state.timeLeft <= 0) {
       timeExpired();
-    } else {
-      render();
+      return;
     }
-  }, 1000);
+    updateTimerUI();
+    state.timerId = setTimeout(tick, 1000);
+  };
+  state.timerId = setTimeout(tick, 1000);
 }
 
 function footerHtml() {
