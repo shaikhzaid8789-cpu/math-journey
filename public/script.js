@@ -768,7 +768,7 @@ window.addEventListener("popstate", () => {
 });
 
 document.addEventListener("DOMContentLoaded", () => {
-  loadHtmlSnippet("/meta-tags.html", document.head);
-  loadHtmlSnippet("/ads.html", document.body);
+  loadHtmlSnippet("./meta-tags.html", document.head);
+  loadHtmlSnippet("./ads.html", document.body);
   render();
 });
